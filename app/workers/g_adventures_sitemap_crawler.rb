@@ -1,4 +1,4 @@
-class GAdventuresCrawler
+class GAdventuresSitemapCrawler
   include Sidekiq::Worker
   def perform(url)
 
@@ -13,8 +13,8 @@ class GAdventuresCrawler
 
     doc = Nokogiri::HTML(r)
 
-    doc.css('li#sitemap-trips ul.sitemap.clearfix li a').each do |link|
-      puts (uri + link["href"]).to_s
+    doc.css("li#sitemap-trips ul.sitemap.clearfix li a").each do |a|
+      GAdventuresTripParser.perform_async((uri + a['href']).to_s)
     end
 
   end
