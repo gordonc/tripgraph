@@ -50,7 +50,7 @@ module Geocoder
     end
     uri.query = params.to_query
 
-    r = Rails.cache.fetch(uri.to_s, :expires_in => 1.day) do
+    r = Rails.cache.fetch(uri.to_s, :expires_in => 7.days) do
       open(uri).read
     end
 
