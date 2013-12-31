@@ -13,15 +13,13 @@ class GAdventuresTripParser
 
     doc = Nokogiri::HTML(r)
 
-    puts doc.css("meta").select{|meta| meta['property'] == "og\:title"}[0]['content']
+    name = doc.css("meta").select{|meta| meta['property'] == "og\:title"}[0]['content']
 
-    doc.css("div#trip-itinerary div.summary div.content ul li").each do |li|
-      puts li.content
-    end
+    places = doc.css("div#trip-itinerary div#itinerary-brief div.content h5").collect{|h5| strip_place_line(h5.content)}
 
-    doc.css("div#trip-itinerary div#itinerary-brief div.content h5").each do |h5|
-      puts strip_place_line(h5.content)
-    end
+    regions = doc.css("div#trip-itinerary div.summary div.content ul li").collect{|li| li.content}
+
+    GAdventuresTripBuilder.perform_async({:name => name, :places => places, :regions => regions})
 
   end
 
