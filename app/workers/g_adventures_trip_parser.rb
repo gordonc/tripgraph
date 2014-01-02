@@ -4,6 +4,7 @@ class GAdventuresTripParser
 
     require 'nokogiri'
     require 'open-uri'
+    require 'geocoder'
 
     uri = URI.parse(url)
 
@@ -13,13 +14,24 @@ class GAdventuresTripParser
 
     doc = Nokogiri::HTML(r)
 
-    name = doc.css("meta").select{|meta| meta['property'] == "og\:title"}[0]['content']
+    trip_name = doc.css("meta").select{|meta| meta['property'] == "og\:title"}[0]['content']
+    place_names = doc.css("div#trip-itinerary div#itinerary-brief div.content h5").collect{|h5| strip_place_line(h5.content)}
+    country_names = doc.css("div#trip-itinerary div.summary div.content ul li").collect{|li| li.content}
+    places = []
 
-    places = doc.css("div#trip-itinerary div#itinerary-brief div.content h5").collect{|h5| strip_place_line(h5.content)}
+    if country_names.length > 0
+      country_name = country_names[0]
+      cc_tld = Geocoder.get_cc_tld(country_name)
+      
+      place_names.each do |place_name|
+        position = Geocoder.get_position(place_name, cc_tld)
+        places << {:name => place_name, :lat => position['lat'], :lon => position['lon']}
+      end
+    else
+      raise "empty regions parse result for trip #{name}"
+    end
 
-    regions = doc.css("div#trip-itinerary div.summary div.content ul li").collect{|li| li.content}
-
-    GAdventuresTripBuilder.perform_async({:name => name, :places => places, :regions => regions})
+    TripWriter.perform_async({:name => trip_name, :places => places})
 
   end
 
