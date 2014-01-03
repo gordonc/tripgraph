@@ -19,16 +19,10 @@ class GAdventuresTripParser
     country_names = doc.css("div#trip-itinerary div.summary div.content ul li").collect{|li| li.content}
     places = []
 
-    if country_names.length > 0
-      country_name = country_names[0]
-      cc_tld = Geocoder.get_cc_tld(country_name)
-      
-      place_names.each do |place_name|
-        position = Geocoder.get_position(place_name, cc_tld)
-        places << {:name => place_name, :lat => position['lat'], :lon => position['lon']}
-      end
-    else
-      raise "empty regions parse result for trip #{name}"
+    cc_tld = get_cc_tld(country_names)
+    place_names.each do |place_name|
+      position = Geocoder.get_position(place_name, cc_tld)
+      places << {:name => place_name, :lat => position['lat'], :lon => position['lon']}
     end
 
     TripWriter.perform_async({:name => trip_name, :places => places})
@@ -42,5 +36,15 @@ class GAdventuresTripParser
       # strip meals suffix
       place = place.sub(%r{\s+\((\d+[BLD]\,?)+\)\s*}, '')
       return place
+  end
+
+  def get_cc_tld(countries)
+    countries.each do |country|
+      begin
+        return Geocoder.get_cc_tld(country)
+      rescue
+      end
+    end
+    raise "unable to get ccTLD from countries #{countries}"
   end
 end
