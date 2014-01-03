@@ -1,11 +1,12 @@
 class TripWriter
   include Sidekiq::Worker
-  def perform(parse_result)
+  def perform(trip)
 
-    name = parse_result['name']
-    places = parse_result['places']
+    url = trip['url']
+    name = trip['name']
+    places = trip['places']
 
-    trip = Trip.new({:name => name})
+    trip = Trip.new({:url => url, :name => name})
     trip.save
 
     prev_place = nil

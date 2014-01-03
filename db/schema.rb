@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20131227045438) do
+ActiveRecord::Schema.define(version: 20140103051216) do
 
   create_table "places", force: true do |t|
     t.string   "name"
@@ -37,6 +37,9 @@ ActiveRecord::Schema.define(version: 20131227045438) do
     t.string   "name"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "url",        null: false
   end
+
+  add_index "trips", ["url"], name: "index_trips_on_url", unique: true
 
 end

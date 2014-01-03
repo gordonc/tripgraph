@@ -25,7 +25,7 @@ class GAdventuresTripParser
       places << {:name => place_name, :lat => position['lat'], :lon => position['lon']}
     end
 
-    TripWriter.perform_async({:name => trip_name, :places => places})
+    TripWriter.perform_async({:url => uri.to_s, :name => trip_name, :places => places})
 
   end
 
