@@ -5,7 +5,8 @@ module Geocoder
 
     if results.length > 0
       result = results[0]
-      return result['geometry']['location']
+      location = result['geometry']['location']
+      return {'lat' => location['lat'], 'lon' => location['lng']}
     else
       raise "empty geocoding response for place #{place}, region #{region}"
     end
