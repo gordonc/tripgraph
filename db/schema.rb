@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140103051216) do
+ActiveRecord::Schema.define(version: 20140112011509) do
 
   create_table "places", force: true do |t|
     t.string   "name"
@@ -21,17 +21,16 @@ ActiveRecord::Schema.define(version: 20140103051216) do
     t.datetime "updated_at"
   end
 
-  create_table "trip_segments", force: true do |t|
+  create_table "trip_places", force: true do |t|
     t.integer  "trip_id"
-    t.integer  "from_place_id"
-    t.integer  "to_place_id"
+    t.integer  "place_id"
+    t.integer  "ordinal"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
-  add_index "trip_segments", ["from_place_id"], name: "index_trip_segments_on_from_place_id"
-  add_index "trip_segments", ["to_place_id"], name: "index_trip_segments_on_to_place_id"
-  add_index "trip_segments", ["trip_id"], name: "index_trip_segments_on_trip_id"
+  add_index "trip_places", ["place_id"], name: "index_trip_places_on_place_id"
+  add_index "trip_places", ["trip_id"], name: "index_trip_places_on_trip_id"
 
   create_table "trips", force: true do |t|
     t.string   "name"

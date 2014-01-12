@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class TripSegmentTest < ActiveSupport::TestCase
+class TripPlaceTest < ActiveSupport::TestCase
   # test "the truth" do
   #   assert true
   # end
