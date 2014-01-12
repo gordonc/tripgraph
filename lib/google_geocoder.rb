@@ -1,4 +1,4 @@
-module Geocoder
+module GoogleGeocoder
   def self.get_position(place, cc_tld)
 
     results = geocode(address: place, region: cc_tld)['results']

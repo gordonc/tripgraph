@@ -4,7 +4,7 @@ class GAdventuresTripParser
 
     require 'nokogiri'
     require 'open-uri'
-    require 'geocoder'
+    require 'google_geocoder'
 
     uri = URI.parse(url)
 
@@ -21,7 +21,7 @@ class GAdventuresTripParser
 
     cc_tld = get_cc_tld(country_names)
     place_names.each do |place_name|
-      position = Geocoder.get_position(place_name, cc_tld)
+      position = GoogleGeocoder.get_position(place_name, cc_tld)
       places << {:name => place_name, :lat => position['lat'], :lon => position['lon']}
     end
 
@@ -41,7 +41,7 @@ class GAdventuresTripParser
   def get_cc_tld(countries)
     countries.each do |country|
       begin
-        return Geocoder.get_cc_tld(country)
+        return GoogleGeocoder.get_cc_tld(country)
       rescue
       end
     end
