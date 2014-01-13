@@ -1,4 +1,4 @@
-class GAdventuresSitemapCrawler
+class GadventuresSitemapCrawler
   include Sidekiq::Worker
   def perform(url)
 
@@ -15,7 +15,7 @@ class GAdventuresSitemapCrawler
 
     doc.css("li#sitemap-trips ul.sitemap.clearfix li a").each do |a|
       trip_uri = uri + a['href']
-      GAdventuresTripParser.perform_async(trip_uri.to_s)
+      GadventuresTripParser.perform_async(trip_uri.to_s)
     end
 
   end

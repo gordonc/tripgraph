@@ -1,4 +1,4 @@
-class GAdventuresTripParser
+class GadventuresTripParser
   include Sidekiq::Worker
   def perform(url)
 
