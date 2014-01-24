@@ -7,7 +7,10 @@ class Place < ActiveRecord::Base
 
   @@es = Elasticsearch::Client.new
 
-  @@es.indices.create index: 'place'
+  unless @@es.indices.exists index: 'place'
+    @@es.indices.create index: 'place'
+  end
+
   @@es.indices.put_mapping index: 'place',
                            type: 'places',
                            body: {

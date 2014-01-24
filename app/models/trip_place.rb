@@ -6,6 +6,10 @@ class TripPlace < ActiveRecord::Base
 
   @@es = Elasticsearch::Client.new
 
+  unless @@es.indices.exists index: 'trip'
+    @@es.indices.create index: 'trip'
+  end
+
   @@es.indices.put_mapping index: 'trip',
                            type: 'places',
                            body: {
@@ -20,6 +24,10 @@ class TripPlace < ActiveRecord::Base
                                }
                              }
                            }
+
+  unless @@es.indices.exists index: 'place'
+    @@es.indices.create index: 'place'
+  end
 
   @@es.indices.put_mapping index: 'place',
                            type: 'trips',

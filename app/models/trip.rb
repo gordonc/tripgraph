@@ -7,7 +7,9 @@ class Trip < ActiveRecord::Base
 
   @@es = Elasticsearch::Client.new
 
-  @@es.indices.create index: 'trip'
+  unless @@es.indices.exists index: 'trip'
+    @@es.indices.create index: 'trip'
+  end
 
   def index
     @@es.index index: 'trip',
