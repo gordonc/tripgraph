@@ -45,13 +45,7 @@ class TripPlace < ActiveRecord::Base
                parent: self.trip.id,
                id: self.place.id,
                body: {
-                 places: {
-                   name: self.place.name,
-                   location: {
-                     lat: self.place.lat,
-                     lon: self.place.lon
-                   }
-                 }
+                 places: self.place.to_elasticsearch
                }
 
     @@es.index index: 'place',
@@ -59,10 +53,7 @@ class TripPlace < ActiveRecord::Base
                parent: self.place.id,
                id: self.trip.id,
                body: {
-                 trips: {
-                   name: self.trip.name,
-                   name: self.trip.url
-                 }
+                 trips: self.trip.to_elasticsearch
                }
   end
 end

@@ -61,6 +61,16 @@ class TripsController < ApplicationController
     end
   end
 
+  def search
+    params.require(:q)
+    @trips = Trip.search({
+        multi_match: {
+          query: params[:q],
+          fields: ['name']
+        }
+    })
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_trip
