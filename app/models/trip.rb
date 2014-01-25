@@ -12,9 +12,11 @@ class Trip < ActiveRecord::Base
   end
 
   def self.search(query)
-    results = @@es.search index: 'trip',
-                          type: 'trips',
-                          body: { query: query }
+    results = @@es.search(
+      index: 'trip',
+      type: 'trips',
+      body: { query: query }
+    )
 
     trips = []
     if results.has_key?('hits')
@@ -38,12 +40,14 @@ class Trip < ActiveRecord::Base
   end
 
   def index
-    @@es.index index: 'trip',
-               type: 'trips',
-               id: self.id,
-               body: {
-                 trips: self.to_elasticsearch
-               }
+    @@es.index(
+      index: 'trip',
+      type: 'trips',
+      id: self.id,
+      body: {
+        trips: self.to_elasticsearch
+      }
+    )
   end
 
   def from_elasticsearch(trip)

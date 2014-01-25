@@ -11,22 +11,26 @@ class Place < ActiveRecord::Base
     @@es.indices.create index: 'place'
   end
 
-  @@es.indices.put_mapping index: 'place',
-                           type: 'places',
-                           body: {
-                             places: {
-                               properties: {
-                                 location: {
-                                   type: 'geo_point'
-                                 }
-                               }
-                             }
-                           }
+  @@es.indices.put_mapping(
+    index: 'place',
+    type: 'places',
+    body: {
+      places: {
+        properties: {
+          location: {
+            type: 'geo_point'
+          }
+        }
+      }
+    }
+  )
 
   def self.search(query)
-    results = @@es.search index: 'place',
-                          type: 'places',
-                          body: { query: query }
+    results = @@es.search(
+      index: 'place',
+      type: 'places',
+      body: { query: query }
+    )
 
     places = []
     if results.has_key?('hits')
@@ -50,12 +54,14 @@ class Place < ActiveRecord::Base
   end
 
   def index
-    @@es.index index: 'place',
-               type: 'places',
-               id: self.id,
-               body: {
-                 places: self.to_elasticsearch
-               }
+    @@es.index(
+      index: 'place',
+      type: 'places',
+      id: self.id,
+      body: {
+        places: self.to_elasticsearch
+      }
+    )
   end
 
   def from_elasticsearch(trip)
