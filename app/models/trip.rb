@@ -11,11 +11,16 @@ class Trip < ActiveRecord::Base
     @@es.indices.create index: 'trip'
   end
 
-  def self.search(query)
+  def self.search(query, filter = nil)
+    body = { query: query }
+    unless filter.nil?
+      body[:filter] = filter
+    end
+
     results = @@es.search(
       index: 'trip',
       type: 'trips',
-      body: { query: query }
+      body: body
     )
 
     trips = []

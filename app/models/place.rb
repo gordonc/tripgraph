@@ -25,11 +25,16 @@ class Place < ActiveRecord::Base
     }
   )
 
-  def self.search(query)
+  def self.search(query, filter = nil)
+    body = { query: query }
+    unless filter.nil?
+      body[:filter] = filter
+    end
+
     results = @@es.search(
       index: 'place',
       type: 'places',
-      body: { query: query }
+      body: body
     )
 
     places = []

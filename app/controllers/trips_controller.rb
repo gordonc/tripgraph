@@ -63,12 +63,31 @@ class TripsController < ApplicationController
 
   def search
     params.require(:q)
-    @trips = Trip.search({
-        multi_match: {
-          query: params[:q],
-          fields: ['name']
+    query = {
+      multi_match: {
+        query: params[:q],
+        fields: ['name']
+      }
+    }
+
+    filter = nil
+    if params.has_key?(:top_left) and params.has_key?(:bottom_right)
+      filter = {
+        has_child: {
+          type: 'places',
+          filter: {
+            geo_bounding_box: {
+              location: {
+                top_left: params[:top_left],
+                bottom_right: params[:bottom_right] 
+              }
+            }
+          }
         }
-    })
+      }
+    end
+
+    @trips = Trip.search(query, filter)
   end
 
   private

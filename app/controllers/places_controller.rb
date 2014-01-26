@@ -63,12 +63,26 @@ class PlacesController < ApplicationController
 
   def search
     params.require(:q)
-    @places = Place.search({
-        multi_match: {
-          query: params[:q],
-          fields: ['name']
+    query = {
+      multi_match: {
+        query: params[:q],
+        fields: ['name']
+      }
+    }
+
+    filter = nil
+    if params.has_key?(:top_left) and params.has_key?(:bottom_right)
+      filter = {
+        geo_bounding_box: {
+          location: {
+            top_left: params[:top_left],
+            bottom_right: params[:bottom_right] 
+          }
         }
-    })
+      }
+    end
+
+    @places = Place.search(query, filter)
   end
 
   private
