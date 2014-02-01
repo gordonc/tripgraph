@@ -14,9 +14,21 @@ class GadventuresTripParser
 
     doc = Nokogiri::HTML(r)
 
-    trip_name = doc.css("meta").select{|meta| meta['property'] == "og\:title"}[0]['content']
-    place_names = doc.css("div#trip-itinerary div#itinerary-brief div.content h5").collect{|h5| strip_place_line(h5.content)}
-    country_names = doc.css("div#trip-itinerary div.summary div.content ul li").collect{|li| li.content}
+    begin 
+      trip_name = doc.css("meta").select{|meta| meta['property'] == "og\:title"}[0]['content']
+    rescue => e
+      raise GadventuresParseError.new("error parsing doc for trip_name", e)
+    end
+    begin
+      place_names = doc.css("div#trip-itinerary div#itinerary-brief div.content h5").collect{|h5| strip_place_line(h5.content)}
+    rescue => e
+      raise GadventuresParseError.new("error parsing doc for place_names", e)
+    end
+    begin
+      country_names = doc.css("div#trip-itinerary div.summary div.content ul li").collect{|li| li.content}
+    rescue => e
+      raise GadventuresParseError.new("error parsing doc for country_names", e)
+    end
     places = []
 
     cc_tld = get_cc_tld(country_names)

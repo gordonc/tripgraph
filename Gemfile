@@ -49,4 +49,5 @@ gem 'nokogiri'
 gem 'redis-store'
 gem 'redis-rails'
 gem 'elasticsearch'
+gem 'nesty'
 
