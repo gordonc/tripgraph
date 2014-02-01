@@ -1,9 +1,9 @@
+require 'nokogiri'
+require 'open-uri'
+
 class GadventuresSitemapCrawler
   include Sidekiq::Worker
   def perform(url)
-
-    require 'nokogiri'
-    require 'open-uri'
 
     uri = URI.parse(url)
 

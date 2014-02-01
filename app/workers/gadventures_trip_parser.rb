@@ -1,10 +1,10 @@
+require 'nokogiri'
+require 'open-uri'
+require 'google_geocoder'
+
 class GadventuresTripParser
   include Sidekiq::Worker
   def perform(url)
-
-    require 'nokogiri'
-    require 'open-uri'
-    require 'google_geocoder'
 
     uri = URI.parse(url)
 
