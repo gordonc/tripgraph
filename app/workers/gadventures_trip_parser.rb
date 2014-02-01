@@ -42,11 +42,8 @@ class GadventuresTripParser
   end
 
   def strip_place_line(line)
-      place = line
-      # strip days prefix
-      place = place.sub(%r{^\s*Days?\s+\d+(\-\d+)?\s+}, '')
-      # strip meals suffix
-      place = place.sub(%r{\s+\((\d+[BLD]\,?)+\)\s*}, '')
+      match = /^\s*Days?\s+\d+(\-\d+)?\s+(?<place>(\w|\p{Word}|\s)*)\s*/.match(line)
+      place = match[:place]
       return place
   end
 
