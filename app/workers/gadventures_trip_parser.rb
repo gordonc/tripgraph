@@ -20,7 +20,7 @@ class GadventuresTripParser
       raise GadventuresParseError.new("error parsing doc for trip_name", e)
     end
     begin
-      place_names = doc.css("div#trip-itinerary>div#itinerary-brief>div.content>h5").collect{|h5| strip_place_line(h5.content)}
+      place_names = doc.css("div#trip-itinerary>div#itinerary-brief>div.content>h5").collect{|h5| get_places_from_itinerary(h5.content)}.flatten
     rescue => e
       raise GadventuresParseError.new("error parsing doc for place_names", e)
     end
@@ -41,10 +41,10 @@ class GadventuresTripParser
 
   end
 
-  def strip_place_line(line)
-      match = /^\s*Days?\s+\d+(\-\d+)?\s+(?<place>(\w|\p{Word}|\s)*)\s*/.match(line)
-      place = match[:place]
-      return place
+  def get_places_from_itinerary(line)
+      match = /^\s*Days?\s+\d+(\-\d+)?\s+(?<places>(\w|\p{Word}|\s)*)\s*/.match(line)
+      places = match[:places].split('/')
+      return places
   end
 
   def get_cc_tld(countries)
