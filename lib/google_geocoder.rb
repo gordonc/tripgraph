@@ -8,7 +8,7 @@ module GoogleGeocoder
       location = result['geometry']['location']
       return {'lat' => location['lat'], 'lon' => location['lng']}
     else
-      raise "empty geocoding response for place #{place}, region #{region}"
+      raise "empty geocoding response for place #{place}, region #{cc_tld}"
     end
  
   end
