@@ -34,7 +34,7 @@ class GadventuresTripParser
     cc_tld = get_cc_tld(country_names)
     place_names.each do |place_name|
       position = GoogleGeocoder.get_position(place_name, cc_tld)
-      places << {:name => place_name, :lat => position['lat'], :lon => position['lon']}
+      places << {:name => place_name, :lat => position.lat, :lon => position.lon}
     end
 
     TripWriter.perform_async({:url => uri.to_s, :name => trip_name, :places => places})

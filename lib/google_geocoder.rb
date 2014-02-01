@@ -1,4 +1,8 @@
 module GoogleGeocoder
+  class Position
+    attr_accessor :lat, :lon
+  end
+
   def self.get_position(place, cc_tld)
 
     results = geocode(address: place, region: cc_tld)['results']
@@ -6,7 +10,10 @@ module GoogleGeocoder
     if results.length > 0
       result = results[0]
       location = result['geometry']['location']
-      return {'lat' => location['lat'], 'lon' => location['lng']}
+      position = Position.new
+      position.lat = location['lat']
+      position.lon = location['lng']
+      return position
     else
       raise "empty geocoding response for place #{place}, region #{cc_tld}"
     end
