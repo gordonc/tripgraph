@@ -52,6 +52,7 @@ class GadventuresTripParser
     begin
       match = /^\s*Days?\s+\d+(\-\d+)?\s+(?<places>(\w|\p{Word}|\s)*)\s*/.match(line)
       places = match[:places].split('/')
+      places = places.collect{|place| place.strip}
       return places
     rescue => e
       raise Exceptions::TripParseError.new("error parsing itinerary line #{line} for place name", e)
