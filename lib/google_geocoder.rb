@@ -35,7 +35,7 @@ module GoogleGeocoder
       if country_codes.length > 0
         return @@cc_tlds[country_codes[0]]
       else
-        raise GeocodingError.new("unable to find country code from geocoding response for country #{country}")
+        raise GeocodingError.new("cannot find country code from geocoding response for country #{country}")
       end
     else
       raise GeocodingError.new("empty geocoding response for country #{country}")
@@ -45,22 +45,29 @@ module GoogleGeocoder
  
   def self.geocode(address: nil, country: nil, region: nil)
 
-    uri = URI.parse("http://maps.googleapis.com")
-    uri.path = "/maps/api/geocode/json"
-    params = {:sensor => false}
+    uri = URI.parse('http://maps.googleapis.com')
+    uri.path = '/maps/api/geocode/json'
+    params = {'sensor' => false}
     unless address.nil?
-      params[:address] = address 
+      params['address'] = address 
     end
     unless country.nil?
-      params[:components] = "country:#{country}"
+      params['components'] = "country:#{country}"
     end
     unless region.nil?
-      params[:region] = region 
+      params['region'] = region 
     end
     uri.query = params.to_query
 
     r = Rails.cache.fetch(uri.to_s, :expires_in => 7.days) do
-      open(uri).read
+      r = open(uri).read
+      json = JSON.parse(r)
+      status = json['status']
+      if status.eql?('OK')
+        r
+      else
+        raise GeocodingError.new("Google returned an error status code #{status}")
+      end
     end
 
     return JSON.parse(r)
