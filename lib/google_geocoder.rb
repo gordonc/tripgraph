@@ -1,3 +1,7 @@
+require 'open-uri'
+require 'json'
+require 'google_geocoder/exceptions'
+
 module GoogleGeocoder
   class Position
     attr_accessor :lat, :lon
@@ -15,7 +19,7 @@ module GoogleGeocoder
       position.lon = location['lng']
       return position
     else
-      raise "empty geocoding response for place #{place}, region #{cc_tld}"
+      raise GeocodingError.new("empty geocoding response for place #{place}, region #{cc_tld}")
     end
  
   end
@@ -31,18 +35,15 @@ module GoogleGeocoder
       if country_codes.length > 0
         return @@cc_tlds[country_codes[0]]
       else
-        raise "unable to find country code from geocoding response for country #{country}"
+        raise GeocodingError.new("unable to find country code from geocoding response for country #{country}")
       end
     else
-      raise "empty geocoding response for country #{country}"
+      raise GeocodingError.new("empty geocoding response for country #{country}")
     end
     
   end
  
   def self.geocode(address: nil, country: nil, region: nil)
-
-    require 'open-uri'
-    require 'json'
 
     uri = URI.parse("http://maps.googleapis.com")
     uri.path = "/maps/api/geocode/json"
