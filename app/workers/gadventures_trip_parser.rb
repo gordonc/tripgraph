@@ -5,6 +5,8 @@ require 'exceptions'
 
 class GadventuresTripParser
   include Sidekiq::Worker
+  @@geocoder = GoogleGeocoder::GoogleGeocoder.new
+
   def perform(url)
 
     uri = URI.parse(url)
@@ -37,7 +39,7 @@ class GadventuresTripParser
     places = []
     place_names.each do |place_name|
       begin
-        position = GoogleGeocoder.get_position(place_name, cc_tld)
+        position = @@geocoder.get_position(place_name, cc_tld)
         places << {:name => place_name, :lat => position.lat, :lon => position.lon}
       rescue => e
         raise Exceptions::TripParseError.new("error geocoding place name #{place_name}, region #{cc_tld}", e)
@@ -62,7 +64,7 @@ class GadventuresTripParser
   def get_cc_tld(countries)
     countries.each do |country|
       begin
-        return GoogleGeocoder.get_cc_tld(country)
+        return @@geocoder.get_cc_tld(country)
       rescue
       end
     end
