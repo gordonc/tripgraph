@@ -65,7 +65,7 @@ module GoogleGeocoder
         if status.eql?('OK')
           r
         else
-          raise GeocodingError.new("Google returned an error status code #{status}")
+          raise GeocodingError.new("Google returned an error status code #{status} for #{uri.to_s}")
         end
       end
 

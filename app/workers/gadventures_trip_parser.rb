@@ -65,9 +65,10 @@ class GadventuresTripParser
     countries.each do |country|
       begin
         return @@geocoder.get_cc_tld(country)
-      rescue
+      rescue => e
+        logger.warn("error getting ccTLD for country #{country}, #{e.message}")
       end
     end
-    raise Exceptions::TripParseError.new("error getting ccTLD from countries #{countries}")
+    raise Exceptions::TripParseError.new("error getting ccTLD for countries #{countries}")
   end
 end
