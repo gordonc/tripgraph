@@ -54,3 +54,6 @@ gem 'nesty'
 gem 'sinatra', '>= 1.3.0', :require => nil
 gem 'sprockets'
 
+gem 'aquarium'
+gem 'redis-semaphore'
+
