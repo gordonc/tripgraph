@@ -21,5 +21,6 @@ module Tripgraph
     # config.i18n.default_locale = :de
 
     config.cache_store = :redis_store, { :namespace => "cache" }
+    config.elasticsearch = { :trace => false }
   end
 end

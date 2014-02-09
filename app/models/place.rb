@@ -5,7 +5,7 @@ class Place < ActiveRecord::Base
 
   after_create :index
 
-  @@es = Elasticsearch::Client.new trace: true
+  @@es = Elasticsearch::Client.new trace: Tripgraph::Application::config.elasticsearch[:trace]
 
   unless @@es.indices.exists index: 'place'
     @@es.indices.create index: 'place'

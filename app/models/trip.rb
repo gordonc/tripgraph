@@ -5,7 +5,7 @@ class Trip < ActiveRecord::Base
 
   after_create :index
 
-  @@es = Elasticsearch::Client.new trace: true
+  @@es = Elasticsearch::Client.new trace: Tripgraph::Application::config.elasticsearch[:trace]
 
   unless @@es.indices.exists index: 'trip'
     @@es.indices.create index: 'trip'
