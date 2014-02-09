@@ -58,18 +58,24 @@ module GoogleGeocoder
       end
       uri.query = params.to_query
 
-      r = Rails.cache.fetch(uri.to_s, :expires_in => 7.days) do
+      r = Rails.cache.read(uri.to_s)
+      if r.nil?
         r = open(uri).read
+
         json = JSON.parse(r)
         status = json['status']
-        if status.eql?('OK')
-          r
-        else
-          raise GeocodingError.new("Google returned an error status code #{status} for #{uri.to_s}")
+        if ['OK', 'ZERO_RESULTS', 'INVALID_REQUEST'].include?(status)
+          Rails.cache.write(uri.to_s, r, :expires_in => 7.days)
         end
       end
 
-      return JSON.parse(r)
+      json = JSON.parse(r)
+      status = json['status']
+      unless status.eql?('OK')
+        raise GeocodingError.new("Google returned an error status code #{status} for #{uri.to_s}")
+      end
+
+      return json
 
     end
 
