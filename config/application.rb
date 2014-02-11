@@ -1,8 +1,6 @@
 require File.expand_path('../boot', __FILE__)
 
 require 'rails/all'
-require 'aquarium'
-require 'open-uri'
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
@@ -24,9 +22,22 @@ module Tripgraph
 
     config.cache_store = :redis_store, { :namespace => "cache" }
     config.elasticsearch = { :trace => false }
-    config.geocoder = { :throttle => (24 * 60 * 60) / 2500 }
+    config.geocoder = {
+      :throttle => (24 * 60 * 60) / 2500,
+      :cc_tlds => {
+        "England" => "United Kingdom",
+        "Inca Trail" => "Peru",
+        "Kilimanjaro" => "Tanzania",
+        "Machu Picchu" => "Peru",
+        "Scotland" => "United Kingdom",
+      }
+    }
 
     config.after_initialize do
+      require 'aquarium'
+      require 'open-uri'
+      require 'google_geocoder'
+
       include Aquarium::Aspects
 
       Aspect.new :around, :calls_to => [:open_uri], :method_options => [:class], :on_types => [OpenURI] do |join_point, object, name|
@@ -38,6 +49,16 @@ module Tripgraph
             sleep(config.geocoder[:throttle])
             result = join_point.proceed
           end
+        else
+          result = join_point.proceed
+        end
+
+        result
+      end
+
+      Aspect.new :around, :calls_to => [:get_cc_tld], :on_types => [GoogleGeocoder::GoogleGeocoder] do |join_point, object, country|
+        if config.geocoder[:cc_tlds].key?(country)
+          result = join_point.proceed(config.geocoder[:cc_tlds][country])
         else
           result = join_point.proceed
         end

@@ -156,7 +156,7 @@ module GoogleGeocoder
       'FO' => 'fo',
       'FR' => 'fr',
       'GA' => 'ga',
-      'GB' => 'gb',
+      'GB' => 'uk',
       'GD' => 'gd',
       'GE' => 'ge',
       'GF' => 'gf',
