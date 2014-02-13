@@ -42,7 +42,8 @@ class GadventuresTripParser
         position = @@geocoder.get_position(place_name, cc_tld)
         places << {:name => place_name, :lat => position.lat, :lon => position.lon}
       rescue => e
-        raise Exceptions::TripParseError.new("error geocoding place name #{place_name}, region #{cc_tld}", e)
+        logger.warn("error geocoding place name #{place_name}, region #{cc_tld}, #{e.message}")
+        places << nil
       end
     end
 
