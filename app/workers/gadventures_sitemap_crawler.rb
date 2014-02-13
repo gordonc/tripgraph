@@ -13,7 +13,7 @@ class GadventuresSitemapCrawler
 
     doc = Nokogiri::HTML(r)
 
-    doc.css("li#sitemap-trips ul.sitemap.clearfix li a").each do |a|
+    doc.css("li#sitemap-trip>ul.sitemap.clearfix>li>a").each do |a|
       trip_uri = uri + a['href']
       GadventuresTripParser.perform_async(trip_uri.to_s)
     end
