@@ -44,16 +44,20 @@ end
 # Use debugger
 # gem 'debugger', group: [:development, :test]
 
-gem 'sidekiq'
-gem 'nokogiri'
-gem 'redis-store'
-gem 'redis-rails'
+gem 'aquarium'
+
 gem 'elasticsearch'
+
 gem 'nesty'
 
+gem 'nokogiri'
+
+gem 'redis-semaphore'
+
+gem 'redis-store'
+gem 'redis-rails'
+
+gem 'sidekiq'
 gem 'sinatra', '>= 1.3.0', :require => nil
 gem 'sprockets'
-
-gem 'aquarium'
-gem 'redis-semaphore'
 
