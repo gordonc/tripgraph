@@ -14,8 +14,8 @@ module GoogleGeocoder
         result = results[0]
         location = result['geometry']['location']
         position = Position.new
-        position.lat = location['lat']
-        position.lon = location['lng']
+        position.lat = location['lat'].round(6)
+        position.lon = location['lng'].round(6)
         return position
       else
         raise GeocodingError.new("empty geocoding response for place #{place}, region #{cc_tld}")
