@@ -44,7 +44,7 @@ end
 # Use debugger
 # gem 'debugger', group: [:development, :test]
 
-gem 'aquarium'
+gem 'aquarium', :git => 'https://github.com/deanwampler/Aquarium.git' 
 
 gem 'elasticsearch'
 
