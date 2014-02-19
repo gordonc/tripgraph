@@ -5,6 +5,8 @@ require 'exceptions'
 
 class GadventuresTripParser
   include Sidekiq::Worker
+  sidekiq_options :queue => :trip_parser
+
   @@geocoder = GoogleGeocoder::GoogleGeocoder.new
 
   def perform(url)

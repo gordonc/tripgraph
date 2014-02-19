@@ -1,5 +1,7 @@
 class TripWriter
   include Sidekiq::Worker
+  sidekiq_options :queue => :trip_writer
+
   def perform(trip)
 
     places = trip['places']
