@@ -1,13 +1,10 @@
 require 'nokogiri'
 require 'open-uri'
-require 'google_geocoder'
 require 'exceptions'
 
 class GadventuresTripParser
   include Sidekiq::Worker
   sidekiq_options :queue => :trip_parser
-
-  @@geocoder = GoogleGeocoder::GoogleGeocoder.new
 
   def perform(url)
 
@@ -35,21 +32,9 @@ class GadventuresTripParser
       raise Exceptions::TripParseError.new("error parsing doc for itinerary lines", e)
     end
 
-    cc_tld = get_cc_tld(country_names)
     place_names = itinerary_lines.collect{|line| get_places_from_itinerary_line(line)}.flatten
 
-    places = []
-    place_names.each do |place_name|
-      begin
-        position = @@geocoder.get_position(place_name, cc_tld)
-        places << {:name => place_name, :lat => position.lat, :lon => position.lon}
-      rescue => e
-        logger.warn("error geocoding place name #{place_name}, region #{cc_tld}, #{e.message}")
-        places << nil
-      end
-    end
-
-    TripWriter.perform_async({:url => uri.to_s, :name => trip_name, :places => places})
+    TripBuilder.perform_async({'url' => uri.to_s, 'trip_name' => trip_name, 'regions' => country_names, 'place_names' => place_names})
 
   end
 
@@ -62,16 +47,5 @@ class GadventuresTripParser
     rescue => e
       raise Exceptions::TripParseError.new("error parsing itinerary line #{line} for place name", e)
     end
-  end
-
-  def get_cc_tld(countries)
-    countries.each do |country|
-      begin
-        return @@geocoder.get_cc_tld(country)
-      rescue => e
-        logger.warn("error getting ccTLD for country #{country}, #{e.message}")
-      end
-    end
-    raise Exceptions::TripParseError.new("error getting ccTLD for countries #{countries}")
   end
 end

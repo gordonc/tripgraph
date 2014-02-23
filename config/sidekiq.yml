@@ -3,4 +3,5 @@
 :queues:
  - [default, 1]
  - [trip_parser, 1]
+ - [trip_builder, 1]
  - [trip_writer, 1]
