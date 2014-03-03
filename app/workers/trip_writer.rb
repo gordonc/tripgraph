@@ -11,8 +11,11 @@ class TripWriter
       unless place.nil?
         place = Place.find_or_create_by({:name => place['name'], :lat => place['lat'], :lon => place['lon']})
         trip_place = TripPlace.find_or_create_by({:trip => trip, :place => place, :ordinal => i})
+        place.index
       end
     end
+
+    trip.index
 
   end
 end

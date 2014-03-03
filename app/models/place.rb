@@ -3,16 +3,14 @@ require 'elasticsearch'
 class Place < ActiveRecord::Base
   has_many :trip_places
 
-  after_create :index
-
   @@es = Elasticsearch::Client.new trace: Tripgraph::Application::config.elasticsearch[:trace]
 
-  unless @@es.indices.exists index: 'place'
-    @@es.indices.create index: 'place'
+  unless @@es.indices.exists index: 'tripgraph'
+    @@es.indices.create index: 'tripgraph'
   end
 
   @@es.indices.put_mapping(
-    index: 'place',
+    index: 'tripgraph',
     type: 'places',
     body: {
       places: {
@@ -32,7 +30,7 @@ class Place < ActiveRecord::Base
     end
 
     results = @@es.search(
-      index: 'place',
+      index: 'tripgraph',
       type: 'places',
       body: body
     )
@@ -59,12 +57,20 @@ class Place < ActiveRecord::Base
   end
 
   def index
+    place = self.to_elasticsearch
+    place['trips'] = []
+    self.trip_places.each do |trip_place|
+      trip = trip_place.trip.to_elasticsearch
+      trip['ordinal'] = trip_place.ordinal
+      place['trips'] << trip
+    end
+
     @@es.index(
-      index: 'place',
+      index: 'tripgraph',
       type: 'places',
       id: self.id,
       body: {
-        places: self.to_elasticsearch
+        places: place
       }
     )
   end
@@ -76,7 +82,7 @@ class Place < ActiveRecord::Base
     self.lon = trip['location']['lon']
   end
 
-  def to_elasticsearch()
+  def to_elasticsearch
     {
       id: self.id,
       name: self.name,
