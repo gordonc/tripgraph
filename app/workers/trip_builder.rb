@@ -9,25 +9,22 @@ class TripBuilder
 
   def perform(trip)
 
-    url = trip['url']
-    trip_name = trip['trip_name']
     country_names = trip['regions']
-    place_names = trip['place_names']
-
     cc_tld = get_cc_tld(country_names)
 
-    places = []
-    place_names.each do |place_name|
+    itinerary = trip['itinerary']
+    itinerary.each do |itinerary_item|
       begin
-        position = @@geocoder.get_position(place_name, cc_tld)
-        places << {:name => place_name, :lat => position.lat, :lon => position.lon}
+        place = itinerary_item['place']
+        position = @@geocoder.get_position(place['name'], cc_tld)
+        place['lat'] = position.lat
+        place['lon'] = position.lon
       rescue => e
-        logger.warn("error geocoding place name #{place_name}, region #{cc_tld}, #{e.message}")
-        places << nil
+        logger.warn("error geocoding place name #{place['name']}, region #{cc_tld}, #{e.message}")
       end
     end
 
-    TripWriter.perform_async({'url' => url, 'name' => trip_name, 'places' => places})
+    TripWriter.perform_async({'url' => trip['url'], 'name' => trip['name'], 'description' => trip['description'], 'itinerary' => itinerary})
 
   end
 

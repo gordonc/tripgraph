@@ -4,15 +4,27 @@ class TripWriter
 
   def perform(trip)
 
-    places = trip['places']
-    trip = Trip.find_or_create_by({:name => trip['name'], :url => trip['url']})
+    trip_url = trip['url']
+    trip_name = trip['name']
+    trip_description = trip['description']
+    itinerary = trip['itinerary']
 
-    places.each_with_index do |place, i|
-      unless place.nil?
-        place = Place.find_or_create_by({:name => place['name'], :lat => place['lat'], :lon => place['lon']})
-        trip_place = TripPlace.find_or_create_by({:trip => trip, :place => place, :ordinal => i})
-        place.index
-      end
+    trip = Trip.find_or_initialize_by({:url => trip_url})
+    trip.name = trip_name
+    trip.description = trip_description
+    trip.save
+
+    itinerary.each_with_index do |itinerary_item, i|
+      place = itinerary_item['place']
+
+      place = Place.find_or_initialize_by({:name => place['name'], :lat => place['lat'], :lon => place['lon']})
+      place.save
+
+      trip_place = TripPlace.find_or_initialize_by({:trip => trip, :place => place, :ordinal => i + 1})
+      trip_place.description = itinerary_item['description']
+      trip_place.save
+
+      place.index
     end
 
     trip.index

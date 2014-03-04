@@ -17,28 +17,50 @@ class GadventuresTripParser
     doc = Nokogiri::HTML(r)
 
     begin 
-      trip_name = doc.css("meta").select{|meta| meta['property'] == "og\:title"}[0]['content']
+      trip_name = doc.css("meta").select{|meta| meta['property'] == 'og:title'}[0]['content']
     rescue => e
       raise Exceptions::TripParseError.new("error parsing doc for trip name", e)
+    end
+    begin 
+      trip_description = doc.css("div#trip-description>p")[0].content
+    rescue => e
+      raise Exceptions::TripParseError.new("error parsing doc for trip description", e)
     end
     begin
       country_names = doc.css("div#trip-itinerary>div.summary>div.content>ul>li").collect{|li| li.content}
     rescue => e
       raise Exceptions::TripParseError.new("error parsing doc for country names", e)
     end
+
+    itinerary = []
     begin
-      itinerary_lines = doc.css("div#trip-itinerary>div#itinerary-brief>div.content>h5").collect{|h5| h5.content}
+      nodes = doc.css("div#trip-itinerary>div#itinerary-brief>div.content").children
+      i = 0
+      while i < nodes.length()
+        if nodes[i].name.eql?('h5')
+          place_names = get_place_names_from_itinerary_line(nodes[i].content)
+        else
+        end
+        i += 1
+        if nodes[i].name.eql?('p')
+          itinerary_item_description = nodes[i].content
+        else
+        end
+        i += 1
+
+        place_names.each do |place_name|
+          itinerary << {'description' => itinerary_item_description, 'place' => {'name' => place_name}}
+        end
+      end
     rescue => e
       raise Exceptions::TripParseError.new("error parsing doc for itinerary lines", e)
     end
 
-    place_names = itinerary_lines.collect{|line| get_places_from_itinerary_line(line)}.flatten
-
-    TripBuilder.perform_async({'url' => uri.to_s, 'trip_name' => trip_name, 'regions' => country_names, 'place_names' => place_names})
+    TripBuilder.perform_async({'url' => uri.to_s, 'name' => trip_name, 'description' => trip_description, 'regions' => country_names, 'itinerary' => itinerary})
 
   end
 
-  def get_places_from_itinerary_line(line)
+  def get_place_names_from_itinerary_line(line)
     begin
       match = /^\s*Days?\s+\d+(\-\d+)?\s+(?<places>(\w|\p{Word}|\s)*)\s*/.match(line)
       places = match[:places].split('/')

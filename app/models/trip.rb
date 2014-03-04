@@ -61,35 +61,42 @@ class Trip < ActiveRecord::Base
   end
 
   def index
-    trip = self.to_elasticsearch
-    trip['places'] = []
-    self.trip_places.each do |trip_place|
-      place = trip_place.place.to_elasticsearch
-      place['ordinal'] = trip_place.ordinal
-      trip['places'] << place
-    end
-
     @@es.index(
       index: 'tripgraph',
       type: 'trips',
       id: self.id,
       body: {
-        trips: trip
+        trips: self.to_elasticsearch
       }
     )
   end
 
   def from_elasticsearch(trip)
     self.id = trip['id']
-    self.name = trip['name']
     self.url = trip['url']
+    self.name = trip['name']
+    self.description = trip['description']
   end
 
   def to_elasticsearch
     {
       id: self.id,
+      url: self.url,
       name: self.name,
-      url: self.url
+      description: self.description,
+      places:
+        self.trip_places.collect do |trip_place|
+          {
+            ordinal: trip_place.ordinal,
+            id: trip_place.place.id,
+            name: trip_place.place.name,
+            location: {
+              lat: trip_place.place.lat,
+              lon: trip_place.place.lon
+            },
+            description: trip_place.description
+          }
+        end
     }
   end
 end

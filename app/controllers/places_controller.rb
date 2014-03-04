@@ -66,7 +66,7 @@ class PlacesController < ApplicationController
     query = {
       multi_match: {
         query: params[:q],
-        fields: ['name', 'trips.name']
+        fields: ['name', 'trips.name', 'trips.description']
       }
     }
 
