@@ -11,37 +11,34 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140304035048) do
+ActiveRecord::Schema.define(version: 20140309044703) do
 
   create_table "places", force: true do |t|
     t.string   "name"
-    t.decimal  "lat",         precision: 8, scale: 6
-    t.decimal  "lon",         precision: 9, scale: 6
+    t.decimal  "lat",        precision: 8, scale: 6
+    t.decimal  "lon",        precision: 9, scale: 6
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.text     "description"
   end
 
   create_table "trip_places", force: true do |t|
+    t.integer  "ordinal"
     t.integer  "trip_id"
     t.integer  "place_id"
-    t.integer  "ordinal"
+    t.text     "description"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.text     "description"
   end
 
   add_index "trip_places", ["place_id"], name: "index_trip_places_on_place_id"
   add_index "trip_places", ["trip_id"], name: "index_trip_places_on_trip_id"
 
   create_table "trips", force: true do |t|
+    t.string   "url"
     t.string   "name"
+    t.text     "description"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "url",         null: false
-    t.text     "description"
   end
-
-  add_index "trips", ["url"], name: "index_trips_on_url", unique: true
 
 end

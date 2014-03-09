@@ -1,11 +1,13 @@
 # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
+  ordinal: 1
   trip_id: 
   place_id: 
-  ordinal: 1
+  description: MyText
 
 two:
+  ordinal: 1
   trip_id: 
   place_id: 
-  ordinal: 1
+  description: MyText
