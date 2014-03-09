@@ -7,7 +7,7 @@ class GadventuresSitemapCrawler
 
     uri = URI.parse(url)
 
-    r = Rails.cache.fetch(uri.to_s, :expires_in => 7.days) do
+    r = Rails.cache.fetch(uri.to_s) do
       open(uri).read
     end
 

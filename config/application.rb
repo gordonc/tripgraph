@@ -20,7 +20,7 @@ module Tripgraph
     # config.i18n.load_path += Dir[Rails.root.join('my', 'locales', '*.{rb,yml}').to_s]
     # config.i18n.default_locale = :de
 
-    config.cache_store = :redis_store, { :namespace => "cache" }
+    config.cache_store = :redis_store, { :namespace => "cache", :expires_in => 1.month }
     config.elasticsearch = { :trace => false }
     config.geocoder = {
       :throttle => (24 * 60 * 60) / 2500,

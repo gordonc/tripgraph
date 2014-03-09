@@ -65,7 +65,7 @@ module GoogleGeocoder
         json = JSON.parse(r)
         status = json['status']
         if ['OK', 'ZERO_RESULTS', 'INVALID_REQUEST'].include?(status)
-          Rails.cache.write(uri.to_s, r, :expires_in => 7.days)
+          Rails.cache.write(uri.to_s, r)
         end
       end
 
