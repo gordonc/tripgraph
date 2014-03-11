@@ -24,7 +24,7 @@ class TripWriter
       trip_place.description = itinerary_item['description']
       trip_place.save
 
-      trip_place.index
+      Search.index(trip_place)
     end
 
   end
