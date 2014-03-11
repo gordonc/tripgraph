@@ -1,1 +1,1 @@
-json.(trip, :id, :name, :created_at, :updated_at, :url)
+json.(trip, :id, :url, :name, :description)

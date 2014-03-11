@@ -61,30 +61,6 @@ class TripsController < ApplicationController
     end
   end
 
-  def search
-    params.require(:q)
-    query = {
-      multi_match: {
-        query: params[:q],
-        fields: ['name', 'description', 'places.name', 'places.description']
-      }
-    }
-
-    filter = nil
-    if params.has_key?(:top_left) and params.has_key?(:bottom_right)
-      filter = {
-        geo_bounding_box: {
-          'places.location' => {
-            top_left: params[:top_left],
-            bottom_right: params[:bottom_right]
-          }
-        }
-      }
-    end
-
-    @trips = Trip.search(query, filter)
-  end
-
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_trip

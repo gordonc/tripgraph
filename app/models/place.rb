@@ -3,75 +3,11 @@ require 'elasticsearch'
 class Place < ActiveRecord::Base
   has_many :trip_places
 
-  @@es = Elasticsearch::Client.new trace: Tripgraph::Application::config.elasticsearch[:trace]
-
-  unless @@es.indices.exists index: 'tripgraph'
-    @@es.indices.create index: 'tripgraph'
-  end
-
-  @@es.indices.put_mapping(
-    index: 'tripgraph',
-    type: 'places',
-    body: {
-      places: {
-        properties: {
-          location: {
-            type: 'geo_point'
-          }
-        }
-      }
-    }
-  )
-
-  def self.search(query, filter = nil)
-    body = { query: query }
-    unless filter.nil?
-      body[:filter] = filter
-    end
-
-    results = @@es.search(
-      index: 'tripgraph',
-      type: 'places',
-      body: body
-    )
-
-    places = []
-    if results.has_key?('hits')
-      hits = results['hits']
-      if hits.has_key?('hits')
-        hits = hits['hits']
-        hits.each do |hit|
-          if hit.has_key?('_source')
-            _source = hit['_source']
-            if _source.has_key?('places')
-              place = Place.new
-              place.from_elasticsearch(_source['places'])
-              places << place
-            end
-          end
-        end
-      end
-    end   
-
-    return places
-  end
-
-  def index
-    @@es.index(
-      index: 'tripgraph',
-      type: 'places',
-      id: self.id,
-      body: {
-        places: self.to_elasticsearch
-      }
-    )
-  end
-
-  def from_elasticsearch(trip)
-    self.id = trip['id']
-    self.name = trip['name']
-    self.lat = trip['location']['lat']
-    self.lon = trip['location']['lon']
+  def from_elasticsearch(place)
+    self.id = place['id']
+    self.name = place['name']
+    self.lat = place['location']['lat']
+    self.lon = place['location']['lon']
   end
 
   def to_elasticsearch
@@ -81,17 +17,7 @@ class Place < ActiveRecord::Base
       location: {
         lat: self.lat,
         lon: self.lon
-      },
-      trips:
-        self.trip_places.collect do |trip_place|
-          {
-            ordinal: trip_place.ordinal,
-            id: trip_place.trip.id,
-            url: trip_place.trip.url,
-            name: trip_place.trip.name,
-            description: trip_place.description
-          }
-        end
+      }
     }
   end
 end
