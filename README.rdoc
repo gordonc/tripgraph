@@ -1,26 +1,2 @@
-== README
-
-elasticsearch delete all indices
- rake elasticsearch:reset
-
-db reset
- rake db:reset
-
-redis flushall
- rake redis:reset
-
-sidekiq puts stats
- rake sidekiq:stats:puts
-
-sidekiq reset stats
- rake sidekiq:stats:reset
-
-sidekiq clear queue
- rake sidekiq:queue:clear
-
-sidekiq stop accepting work
- sidekiqctl quiet tmp/pids/sidekiq.pid
-
-sidekiq stop process
- sidekiqctl stop tmp/pids/sidekiq.pid
+== tripgraph
 
