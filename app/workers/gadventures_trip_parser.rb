@@ -17,7 +17,7 @@ class GadventuresTripParser
     doc = Nokogiri::HTML(r)
 
     begin 
-      trip_name = doc.css("meta").select{|meta| meta['property'] == 'og:title'}[0]['content']
+      trip_name = doc.css("div#content-head>div>h1>span")[0].content
     rescue => e
       raise Exceptions::TripParseError.new("error parsing doc for trip name", e)
     end
