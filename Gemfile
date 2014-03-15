@@ -44,19 +44,26 @@ end
 # Use debugger
 # gem 'debugger', group: [:development, :test]
 
+# aspect oriented programming
 gem 'aquarium', :git => 'https://github.com/deanwampler/Aquarium.git' 
 
+# elasticsearch
 gem 'elasticsearch'
 
+# exception chain
 gem 'nesty'
 
+# css selectors
 gem 'nokogiri'
 
+# interprocess communication
 gem 'redis-semaphore'
 
+# redis
 gem 'redis-store'
 gem 'redis-rails'
 
+# sidekiq
 gem 'sidekiq'
 gem 'sinatra', '>= 1.3.0', :require => nil
 gem 'sprockets'
