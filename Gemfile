@@ -68,3 +68,6 @@ gem 'sidekiq'
 gem 'sinatra', '>= 1.3.0', :require => nil
 gem 'sprockets'
 
+# heroku
+gem 'rails_12factor', group: :production
+
