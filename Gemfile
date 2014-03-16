@@ -71,5 +71,8 @@ gem 'sprockets'
 # heroku
 gem 'rails_12factor', group: :production
 
+# web server
+gem 'unicorn'
+
 ruby "2.1.1"
 
