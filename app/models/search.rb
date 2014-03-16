@@ -1,5 +1,7 @@
+require 'elasticsearch'
+
 class Search
-  @@es = Elasticsearch::Client.new trace: Tripgraph::Application::config.elasticsearch[:trace]
+  @@es = Elasticsearch::Client.new Tripgraph::Application.config.elasticsearch
 
   unless @@es.indices.exists index: 'tripgraph'
     @@es.indices.create index: 'tripgraph'

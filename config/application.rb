@@ -21,7 +21,9 @@ module Tripgraph
     # config.i18n.default_locale = :de
 
     config.cache_store = :redis_store, { :namespace => "cache", :expires_in => 1.month }
-    config.elasticsearch = { :trace => false }
+
+    config.elasticsearch = { :url => ENV['BONSAI_URL'] || "http://localhost:9200", :log => false, :trace => false }
+
     config.geocoder = {
       :throttle => (24 * 60 * 60) / 2500,
       :cc_tlds => {
