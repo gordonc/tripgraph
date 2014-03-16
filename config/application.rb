@@ -32,12 +32,6 @@ module Tripgraph
         "Kilimanjaro" => "Tanzania",
         "Machu Picchu" => "Peru",
         "Scotland" => "United Kingdom",
-      },
-      :places => {
-        "Annapurna Foothills" => "Annapurna",
-        "Badlands NP" => "Badlands National Park",
-        "Grand Canyon NP" => "Grand Canyon National Park",
-        "Zion NP" => "Zion National Park",
       }
     }
 
@@ -67,16 +61,6 @@ module Tripgraph
       Aspect.new :around, :calls_to => [:get_cc_tld], :on_types => [GoogleGeocoder::GoogleGeocoder] do |join_point, object, country|
         if config.geocoder[:cc_tlds].key?(country)
           result = join_point.proceed(config.geocoder[:cc_tlds][country])
-        else
-          result = join_point.proceed
-        end
-
-        result
-      end
-
-      Aspect.new :around, :calls_to => [:get_position], :on_types => [GoogleGeocoder::GoogleGeocoder] do |join_point, object, place, cc_tld|
-        if config.geocoder[:places].key?(place)
-          result = join_point.proceed(config.geocoder[:places][place], cc_tld)
         else
           result = join_point.proceed
         end
