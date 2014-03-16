@@ -20,7 +20,9 @@ module Tripgraph
     # config.i18n.load_path += Dir[Rails.root.join('my', 'locales', '*.{rb,yml}').to_s]
     # config.i18n.default_locale = :de
 
-    config.cache_store = :redis_store, { :namespace => "cache", :expires_in => 1.month }
+    config.cache_store = :redis_store, { :url => ENV['REDISCLOUD_URL'] || "redis://localhost", :namespace => "cache", :expires_in => 1.month }
+    config.redis = { :url => ENV['REDISCLOUD_URL'] || "redis://localhost" }
+    config.redis_semaphore = { :url => ENV['REDISCLOUD_URL'] || "redis://localhost" }
 
     config.elasticsearch = { :url => ENV['BONSAI_URL'] || "http://localhost:9200", :log => false, :trace => false }
 
@@ -45,7 +47,7 @@ module Tripgraph
       Aspect.new :around, :calls_to => [:open_uri], :method_options => [:class], :on_types => [OpenURI] do |join_point, object, name|
         uri = URI::Generic === name ? name : URI.parse(name)
         if uri.host.eql?("maps.googleapis.com")
-          s = Redis::Semaphore.new(:google_geocoder)
+          s = Redis::Semaphore.new(:google_geocoder, config.redis_semaphore)
           result = nil
           s.lock do
             sleep(config.geocoder[:throttle])
