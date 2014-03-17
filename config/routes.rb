@@ -5,7 +5,6 @@ Tripgraph::Application.routes.draw do
   root "maps#index"
 
   get '/search', to: 'search#index'
-  resources :trips
-  resources :places
+
   mount Sidekiq::Web => '/sidekiq'
 end
