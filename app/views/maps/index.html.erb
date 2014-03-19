@@ -52,81 +52,137 @@
         font-size: 13px;
         font-weight: 300;
       }
-}
 
     </style>
-    <title>Places search box</title>
-    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places"></script>
+    <title>Tripgraph</title>
+    <script src="//maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js" ></script>
     <script>
-// This example adds a search box to a map, using the Google Place Autocomplete
-// feature. People can enter geographical searches. The search box will return a
-// pick list containing a mix of places and predicted search terms.
-
 function initialize() {
 
-  var markers = [];
   var map = new google.maps.Map(document.getElementById('map-canvas'), {
     mapTypeId: google.maps.MapTypeId.ROADMAP
   });
 
-  var defaultBounds = new google.maps.LatLngBounds(
-      new google.maps.LatLng(-33.8902, 151.1759),
-      new google.maps.LatLng(-33.8474, 151.2631));
-  map.fitBounds(defaultBounds);
+  map.setCenter(new google.maps.LatLng(0, 0));
+  map.setZoom(2);
 
-  // Create the search box and link it to the UI element.
-  var input = /** @type {HTMLInputElement} */(
-      document.getElementById('pac-input'));
-  map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+  var form = document.getElementById('pac-form');
+  var input = document.getElementById('pac-input');
+  map.controls[google.maps.ControlPosition.TOP_LEFT].push(form);
 
-  var searchBox = new google.maps.places.SearchBox(
-    /** @type {HTMLInputElement} */(input));
+  var markers = {};
+  var lines = {};
 
-  // [START region_getplaces]
-  // Listen for the event fired when the user selects an item from the
-  // pick list. Retrieve the matching places for that item.
-  google.maps.event.addListener(searchBox, 'places_changed', function() {
-    var places = searchBox.getPlaces();
+  function search(q, bounds) {
+    var sw = bounds.getSouthWest();
+    var ne = bounds.getNorthEast();
 
-    for (var i = 0, marker; marker = markers[i]; i++) {
-      marker.setMap(null);
+    var params = {
+      q: q
+    };
+
+    if (!(sw.lng() == -180 && ne.lng() == 180)) {
+      params['top_left'] = ne.lat() + "," + sw.lng();
+      params['bottom_right'] = sw.lat() + "," + ne.lng();
     }
 
-    // For each place, get the icon, place name, and location.
-    markers = [];
-    var bounds = new google.maps.LatLngBounds();
-    for (var i = 0, place; place = places[i]; i++) {
-      var image = {
-        url: place.icon,
-        size: new google.maps.Size(71, 71),
-        origin: new google.maps.Point(0, 0),
-        anchor: new google.maps.Point(17, 34),
-        scaledSize: new google.maps.Size(25, 25)
-      };
+    $.getJSON("/search.json", params, function(json) {
+      var trips = {};
+      var places = {};
+      var trip_places = {};
 
-      // Create a marker for each place.
-      var marker = new google.maps.Marker({
-        map: map,
-        icon: image,
-        title: place.name,
-        position: place.geometry.location
+      $.each(json.trips, function(index, trip) {
+        trips[trip.id] = trip;
+        trips[trip.id].trip_place_ids = [];
+      });
+      $.each(json.places, function(index, place) {
+        places[place.id] = place;
+        places[place.id].trip_place_ids = [];
+      });
+      $.each(json.trip_places, function(index, trip_place) {
+        trips[trip_place.trip_id].trip_place_ids.push(trip_place.id);
+        places[trip_place.place_id].trip_place_ids.push(trip_place.id);
+        trip_places[trip_place.id] = trip_place;
       });
 
-      markers.push(marker);
+      updateMap(map, markers, getMarkers(trips, places, trip_places));
+      updateMap(map, lines, getLines(trips, places, trip_places));
+    });
+  }
 
-      bounds.extend(place.geometry.location);
+  function getMarkers(trips, places, trip_places) {
+    var markers = {};
+
+    $.each(places, function(id, place) {
+      var marker = new google.maps.Marker({
+        position: new google.maps.LatLng(place.lat, place.lon),
+        title: place.name
+      });
+      markers[id] = marker;
+    });
+
+    return markers;
+  }
+
+  function getLines(trips, places, trip_places) {
+    var lines = {};
+
+    $.each(trips, function(id, trip) {
+      var path = trip.trip_place_ids
+        .map(function(trip_place_id) {
+          return trip_places[trip_place_id];
+        })
+        .sort(function(trip_place_a, trip_place_b) {
+          return trip_place_a.ordinal - trip_place_b.ordinal;
+        });
+
+      for (var i=1; i<path.length; i++) {
+        var p1 = places[path[i-1].place_id];
+        var p2 = places[path[i].place_id];
+        var line = new google.maps.Polyline({
+          path: [p1, p2]
+            .map(function(place) {
+              return new google.maps.LatLng(place.lat, place.lon);
+            }),
+          geodesic: true
+        });
+
+        lines[p1.id + "," + p2.id] = line;
+      }
+    });
+
+    return lines;
+  }
+
+  function updateMap(map, source, target) {
+    $.each(target, function(id, element) {
+      if (!(id in source)) {
+        element.setMap(map);
+        source[id] = element;
+      }
+    });
+    $.each(source, function(id, element) {
+      if (!(id in target)) {
+        delete source[id];
+        element.setMap(null);
+      }
+    });
+  }
+
+  form.addEventListener('submit', function(event) {
+    event.preventDefault();
+    if (input.value) {
+      search(input.value, map.getBounds());
     }
-
-    map.fitBounds(bounds);
   });
-  // [END region_getplaces]
 
-  // Bias the SearchBox results towards places that are within the bounds of the
-  // current map's viewport.
-  google.maps.event.addListener(map, 'bounds_changed', function() {
-    var bounds = map.getBounds();
-    searchBox.setBounds(bounds);
+  google.maps.event.addListener(map, 'idle', function() {
+    if (input.value) {
+      search(input.value, map.getBounds());
+    }
   });
+
 }
 
 google.maps.event.addDomListener(window, 'load', initialize);
@@ -139,7 +195,9 @@ google.maps.event.addDomListener(window, 'load', initialize);
     </style>
   </head>
   <body>
-    <input id="pac-input" class="controls" type="text" placeholder="Search Box">
+    <form action="#" id="pac-form">
+      <input id="pac-input" class="controls" type="text" placeholder="Search Box">
+    </form>
     <div id="map-canvas"></div>
   </body>
 </html>
