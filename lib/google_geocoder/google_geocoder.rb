@@ -12,10 +12,16 @@ module GoogleGeocoder
 
       if results.length > 0
         result = results[0]
+
         location = result['geometry']['location']
         position = Position.new
         position.lat = location['lat'].round(6)
         position.lon = location['lng'].round(6)
+
+        address_components = result['address_components']
+        country_codes = address_components.select{|component| component['types'] == ['country', 'political']}.collect{|component| component['short_name']} 
+        position.cc_tld = @@cc_tlds[country_codes[0]]
+
         return position
       else
         raise GeocodingError.new("empty geocoding response for place #{place}, region #{cc_tld}")

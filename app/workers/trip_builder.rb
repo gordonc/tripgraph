@@ -10,17 +10,23 @@ class TripBuilder
   def perform(trip)
 
     country_names = trip['regions']
-    cc_tld = get_cc_tld(country_names)
+    cc_tlds = get_cc_tlds(country_names)
+
+    if cc_tlds.empty?
+      raise Exceptions::TripParseError.new("error getting ccTLD for countries #{countries}")
+    end
 
     itinerary = trip['itinerary']
     itinerary.each do |itinerary_item|
       begin
         place = itinerary_item['place']
-        position = @@geocoder.get_position(place['name'], cc_tld)
-        place['lat'] = position.lat
-        place['lon'] = position.lon
+        position = @@geocoder.get_position(place['name'], cc_tlds[0])
+        if cc_tlds.include?(position.cc_tld)
+          place['lat'] = position.lat
+          place['lon'] = position.lon
+        end
       rescue => e
-        logger.warn("error geocoding place name #{place['name']}, region #{cc_tld}, #{e.message}")
+        logger.warn("error geocoding place name #{place['name']}, region #{cc_tlds[0]}, #{e.message}")
       end
     end
 
@@ -28,14 +34,17 @@ class TripBuilder
 
   end
 
-  def get_cc_tld(countries)
+  def get_cc_tlds(countries)
+    cc_tlds = []
+
     countries.each do |country|
       begin
-        return @@geocoder.get_cc_tld(country)
+        cc_tlds << @@geocoder.get_cc_tld(country)
       rescue => e
         logger.warn("error getting ccTLD for country #{country}, #{e.message}")
       end
     end
-    raise Exceptions::TripParseError.new("error getting ccTLD for countries #{countries}")
+
+    return cc_tlds
   end
 end

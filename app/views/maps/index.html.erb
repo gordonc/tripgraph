@@ -115,11 +115,13 @@ function initialize() {
     var markers = {};
 
     $.each(places, function(id, place) {
-      var marker = new google.maps.Marker({
-        position: new google.maps.LatLng(place.lat, place.lon),
-        title: place.name
-      });
-      markers[id] = marker;
+      if (place.lat != null && place.lon != null) {
+        var marker = new google.maps.Marker({
+          position: new google.maps.LatLng(place.lat, place.lon),
+          title: place.name
+        });
+        markers[id] = marker;
+      }
     });
 
     return markers;
@@ -135,6 +137,9 @@ function initialize() {
         })
         .sort(function(trip_place_a, trip_place_b) {
           return trip_place_a.ordinal - trip_place_b.ordinal;
+        })
+        .filter(function(trip_place) {
+          return places[trip_place.place_id].lat != null && places[trip_place.place_id].lat != null;
         });
 
       for (var i=1; i<path.length; i++) {
