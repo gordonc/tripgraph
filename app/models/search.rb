@@ -27,6 +27,7 @@ class Search
 
   def self.search(query, top_left, bottom_right)
     body = {
+      size: 25,
       query: {
         multi_match: {
           query: query,
