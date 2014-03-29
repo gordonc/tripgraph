@@ -118,7 +118,15 @@ function initialize() {
       if (place.lat != null && place.lon != null) {
         var marker = new google.maps.Marker({
           position: new google.maps.LatLng(place.lat, place.lon),
-          title: place.name
+          title: place.name,
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 3,
+            fillColor: "red",
+            fillOpacity: 1,
+            strokeColor: "white",
+            strokeWeight: 1
+          }
         });
         markers[id] = marker;
       }
@@ -150,7 +158,9 @@ function initialize() {
             .map(function(place) {
               return new google.maps.LatLng(place.lat, place.lon);
             }),
-          geodesic: true
+          geodesic: true,
+          strokeOpacity: 0.75,
+          strokeWeight: 2
         });
 
         lines[p1.id + "," + p2.id] = line;
