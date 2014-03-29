@@ -62,7 +62,7 @@ class GadventuresTripParser
 
   def get_place_names_from_itinerary_line(line)
     begin
-      match = /^\s*Days?\s+\d+(\-\d+)?\s+(?<places>(\w|\p{Word}|\s)*)\s*/.match(line)
+      match = /^\s*Days?\s+\d+(\-\d+)?\s+(?<places>(\w|\p{Word}|\p{Punct}|\s)*?)\s*(\(([BLD]|[0-9]|\s|\p{Punct})+\))?\s*$/.match(line)
       places = match[:places].split('/')
       places = places.collect{|place| place.strip}
       return places
