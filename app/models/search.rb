@@ -61,15 +61,13 @@ class Search
         hits.each do |hit|
           if hit.has_key?('_source')
             _source = hit['_source']
-            if _source.has_key?('trip_places')
-              trip_place = TripPlace.new
-              trip_place.from_elasticsearch(_source['trip_places'])
-              trip_place.trip = Trip.new
-              trip_place.trip.from_elasticsearch(_source['trip_places']['trip'])
-              trip_place.place = Place.new
-              trip_place.place.from_elasticsearch(_source['trip_places']['place'])
-              trip_places << trip_place
-            end
+            trip_place = TripPlace.new
+            trip_place.from_elasticsearch(_source)
+            trip_place.trip = Trip.new
+            trip_place.trip.from_elasticsearch(_source['trip'])
+            trip_place.place = Place.new
+            trip_place.place.from_elasticsearch(_source['place'])
+            trip_places << trip_place
           end
         end
       end
@@ -91,9 +89,7 @@ class Search
       index: 'tripgraph',
       type: 'trip_places',
       id: id,
-      body: {
-        trip_places: trip_place
-      }
+      body: trip_place
     )
   end
 end
