@@ -88,30 +88,42 @@ function initialize() {
     }
 
     $.getJSON("/search.json", params, function(json) {
-      var trips = {};
-      var places = {};
-      var trip_places = {};
-
-      $.each(json.trips, function(index, trip) {
-        trips[trip.id] = trip;
-        trips[trip.id].trip_place_ids = [];
-      });
-      $.each(json.places, function(index, place) {
-        places[place.id] = place;
-        places[place.id].trip_place_ids = [];
-      });
-      $.each(json.trip_places, function(index, trip_place) {
-        trips[trip_place.trip_id].trip_place_ids.push(trip_place.id);
-        places[trip_place.place_id].trip_place_ids.push(trip_place.id);
-        trip_places[trip_place.id] = trip_place;
-      });
-
-      updateMap(map, markers, getMarkers(trips, places, trip_places));
-      updateMap(map, lines, getLines(trips, places, trip_places));
+      var graph = getGraph(json);
+      updateMap(map, markers, getMarkers(graph));
+      updateMap(map, lines, getLines(graph));
     });
   }
 
-  function getMarkers(trips, places, trip_places) {
+  function getGraph(json) {
+    var trips = {};
+    var places = {};
+    var trip_places = {};
+
+    $.each(json.trips, function(index, trip) {
+      trips[trip.id] = trip;
+      trips[trip.id].trip_place_ids = [];
+    });
+    $.each(json.places, function(index, place) {
+      places[place.id] = place;
+      places[place.id].trip_place_ids = [];
+    });
+    $.each(json.trip_places, function(index, trip_place) {
+      trips[trip_place.trip_id].trip_place_ids.push(trip_place.id);
+      places[trip_place.place_id].trip_place_ids.push(trip_place.id);
+      trip_places[trip_place.id] = trip_place;
+    });
+
+    var graph = {};
+    graph.trips = trips;
+    graph.places = places;
+    graph.trip_places = trip_places;
+    return graph;
+  }
+
+  function getMarkers(graph) {
+    var trips = graph.trips;
+    var places = graph.places;
+    var trip_places = graph.trip_places;
     var markers = {};
 
     $.each(places, function(id, place) {
@@ -135,7 +147,10 @@ function initialize() {
     return markers;
   }
 
-  function getLines(trips, places, trip_places) {
+  function getLines(graph) {
+    var trips = graph.trips;
+    var places = graph.places;
+    var trip_places = graph.trip_places;
     var lines = {};
 
     $.each(trips, function(id, trip) {
