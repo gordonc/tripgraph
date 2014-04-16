@@ -26,7 +26,7 @@ module Tripgraph
 
     config.elasticsearch = { :url => ENV['BONSAI_URL'] || "http://localhost:9200", :log => false, :trace => false }
 
-    config.geocoder = {
+    config.google_geocoder = {
       :throttle => (24 * 60 * 60) / 2500,
       :cc_tlds => {
         "England" => "United Kingdom",
@@ -44,13 +44,14 @@ module Tripgraph
 
       include Aquarium::Aspects
 
+      # throttle GoogleGeocoder geocoding requests
       Aspect.new :around, :calls_to => [:open_uri], :method_options => [:class], :on_types => [OpenURI] do |join_point, object, name|
         uri = URI::Generic === name ? name : URI.parse(name)
         if uri.host.eql?("maps.googleapis.com")
           s = Redis::Semaphore.new(:google_geocoder, config.redis_semaphore)
           result = nil
           s.lock do
-            sleep(config.geocoder[:throttle])
+            sleep(config.google_geocoder[:throttle])
             result = join_point.proceed
           end
         else
@@ -60,9 +61,10 @@ module Tripgraph
         result
       end
 
+      # substitute GoogleGeocoder cc_tld lookup
       Aspect.new :around, :calls_to => [:get_cc_tld], :on_types => [GoogleGeocoder::GoogleGeocoder] do |join_point, object, country|
-        if config.geocoder[:cc_tlds].key?(country)
-          result = join_point.proceed(config.geocoder[:cc_tlds][country])
+        if config.google_geocoder[:cc_tlds].key?(country)
+          result = join_point.proceed(config.google_geocoder[:cc_tlds][country])
         else
           result = join_point.proceed
         end

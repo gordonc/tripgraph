@@ -2,6 +2,15 @@ class TripWriter
   include Sidekiq::Worker
   sidekiq_options :queue => :trip_writer
 
+  # trip fields
+  #   url
+  #   name
+  #   description
+  #   itinerary
+  #     place
+  #       name
+  #       lat
+  #       lon
   def perform(trip)
 
     trip_url = trip['url']

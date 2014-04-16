@@ -7,6 +7,14 @@ class TripBuilder
 
   @@geocoder = GoogleGeocoder::GoogleGeocoder.new
 
+  # trip fields
+  #   url
+  #   name
+  #   description
+  #   itinerary
+  #     place
+  #       name - also for geolocation lookup
+  #   regions - for geolocation lookup context hint
   def perform(trip)
 
     country_names = trip['regions']
