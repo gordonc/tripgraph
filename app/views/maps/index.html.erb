@@ -294,8 +294,8 @@ function initialize() {
           title: place.name,
           icon: {
             path: google.maps.SymbolPath.CIRCLE,
-            scale: 3,
-            fillColor: "red",
+            scale: 5,
+            fillColor: "DeepSkyBlue",
             fillOpacity: 1,
             strokeColor: "white",
             strokeWeight: 1
@@ -335,6 +335,7 @@ function initialize() {
               return new google.maps.LatLng(place.lat, place.lon);
             }),
           geodesic: true,
+          strokeColor: "LightSkyBlue",
           strokeOpacity: 0.75,
           strokeWeight: 2
         });
