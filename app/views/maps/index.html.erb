@@ -56,7 +56,8 @@
     </style>
     <title>Tripgraph</title>
     <script src="//maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places"></script>
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js" ></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
     <script>
 function initialize() {
 
@@ -73,8 +74,10 @@ function initialize() {
 
   var markers = {};
   var lines = {};
+  var stack = [];
 
-  function search(q, bounds) {
+  function search(q, map) {
+    var bounds = map.getBounds();
     var sw = bounds.getSouthWest();
     var ne = bounds.getNorthEast();
 
@@ -89,9 +92,54 @@ function initialize() {
 
     $.getJSON("/search.json", params, function(json) {
       var graph = getGraph(json);
+      updateStack(stack, map.getZoom(), graph);
+      graph = getGraphFromStack(stack);
       updateMap(map, markers, getMarkers(graph));
       updateMap(map, lines, getLines(graph));
     });
+  }
+
+  function updateStack(stack, level, graph) {
+    while (stack.length-1 < level) {
+      stack.push({});
+    }
+
+    while (stack.length-1 > level) {
+      stack.pop();
+    }
+
+    merge(stack[level], graph);
+  }
+
+  function getGraphFromStack(stack) {
+    var merged = {};
+
+    $.each(stack, function(index, graph) {
+      merge(merged, graph);
+    });
+
+    return merged;
+  }
+
+  function merge(target, obj) {
+    for (property in obj) {
+      if (typeof obj[property] === 'object') {
+        if (Array.isArray(obj[property])) {
+          target[property] = _.union(target[property], obj[property]);
+        }
+        else {
+          if (!(property in target)) {
+            target[property] = $.extend({}, obj[property]);
+          }
+          target[property] = merge(target[property], obj[property]);
+        }
+      }
+      else {
+        target[property] = obj[property];
+      }
+    }
+
+    return target;
   }
 
   function getGraph(json) {
@@ -203,13 +251,14 @@ function initialize() {
   form.addEventListener('submit', function(event) {
     event.preventDefault();
     if (input.value) {
-      search(input.value, map.getBounds());
+      stack = [];
+      search(input.value, map);
     }
   });
 
   google.maps.event.addListener(map, 'idle', function() {
     if (input.value) {
-      search(input.value, map.getBounds());
+      search(input.value, map);
     }
   });
 
