@@ -189,6 +189,11 @@ function initialize() {
   var lines = {};
   var stack = [];
 
+  /**
+   * update map with search results
+   * @param {string} q query string
+   * @param {Map} map
+   */
   function search(q, map) {
     var bounds = map.getBounds();
     var sw = bounds.getSouthWest();
@@ -212,49 +217,11 @@ function initialize() {
     });
   }
 
-  function updateStack(stack, level, graph) {
-    while (stack.length-1 < level) {
-      stack.push({});
-    }
-
-    while (stack.length-1 > level) {
-      stack.pop();
-    }
-
-    merge(stack[level], graph);
-  }
-
-  function getGraphFromStack(stack) {
-    var merged = {};
-
-    $.each(stack, function(index, graph) {
-      merge(merged, graph);
-    });
-
-    return merged;
-  }
-
-  function merge(target, obj) {
-    for (property in obj) {
-      if (typeof obj[property] === 'object') {
-        if (Array.isArray(obj[property])) {
-          target[property] = _.union(target[property], obj[property]);
-        }
-        else {
-          if (!(property in target)) {
-            target[property] = $.extend({}, obj[property]);
-          }
-          target[property] = merge(target[property], obj[property]);
-        }
-      }
-      else {
-        target[property] = obj[property];
-      }
-    }
-
-    return target;
-  }
-
+  /**
+   * get graph object from search results JSON
+   * @param {Object} json search results JSON
+   * @returns {Object} graph
+   */
   function getGraph(json) {
     var trips = {};
     var places = {};
@@ -281,6 +248,71 @@ function initialize() {
     return graph;
   }
 
+  /**
+   * push/pop graph stack to level
+   * then merge graph object to the graph at that level
+   * @param {Array.<Object>} stack graph object stack
+   * @param {number} level
+   * @param {Object} graph
+   */
+  function updateStack(stack, level, graph) {
+    while (stack.length-1 < level) {
+      stack.push({});
+    }
+
+    while (stack.length-1 > level) {
+      stack.pop();
+    }
+
+    merge(stack[level], graph);
+  }
+
+  /**
+   * get graph object from merging the graph at every level of the stack
+   * @param {Array.<Object>} stack graph object stack
+   * @return {Object} graph
+   */
+  function getGraphFromStack(stack) {
+    var merged = {};
+
+    $.each(stack, function(index, graph) {
+      merge(merged, graph);
+    });
+
+    return merged;
+  }
+
+  /**
+   * merge obj to target recursively with deep copy
+   * @params {Object} target
+   * @params {Object} obj
+   */
+  function merge(target, obj) {
+    for (property in obj) {
+      if (typeof obj[property] === 'object') {
+        if (Array.isArray(obj[property])) {
+          target[property] = _.union(target[property], obj[property]);
+        }
+        else {
+          if (!(property in target)) {
+            target[property] = $.extend({}, obj[property]);
+          }
+          target[property] = merge(target[property], obj[property]);
+        }
+      }
+      else {
+        target[property] = obj[property];
+      }
+    }
+
+    return target;
+  }
+
+  /**
+   * create Marker objects from graph object
+   * @param {object} graph
+   * @returns {Object.<string, MVCObject>} markers
+   */
   function getMarkers(graph) {
     var trips = graph.trips;
     var places = graph.places;
@@ -308,6 +340,11 @@ function initialize() {
     return markers;
   }
 
+  /**
+   * create PolyLine objects from graph object
+   * @param {object} graph
+   * @returns {Object.<string, MVCObject>} lines
+   */
   function getLines(graph) {
     var trips = graph.trips;
     var places = graph.places;
@@ -347,6 +384,12 @@ function initialize() {
     return lines;
   }
 
+  /**
+   * update map and target to source
+   * @param {Map} map
+   * @param {Object.<string, MVCObject>} source
+   * @param {Object.<string, MVCObject>} target
+   */
   function updateMap(map, source, target) {
     $.each(target, function(id, element) {
       if (!(id in source)) {
