@@ -16,44 +16,73 @@ class GadventuresTripParser
 
     doc = Nokogiri::HTML(r)
 
-    begin 
-      trip_name = doc.css("div#content-head>div>h1>span")[0].content
-    rescue => e
-      raise Exceptions::TripParseError.new("error parsing doc for trip name", e)
-    end
-    begin 
-      trip_description = doc.css("div#trip-description>p")[0].content
-    rescue => e
-      raise Exceptions::TripParseError.new("error parsing doc for trip description", e)
-    end
     begin
-      country_names = doc.css("div#trip-itinerary>div.summary>div.content>ul>li").collect{|li| li.content}
+      nodes = doc.css("div[itemtype='http://schema.org/Product'] h1>span[itemprop='name']")
+      if nodes.length > 0
+        trip_name = nodes[0].content
+      else
+        raise Exceptions::TripParseError.new("empty trip name nodeset for doc #{url}")
+      end
     rescue => e
-      raise Exceptions::TripParseError.new("error parsing doc for country names", e)
+      raise Exceptions::TripParseError.new("error parsing trip name for doc #{url}", e)
+    end
+
+    begin
+      nodes = doc.css("div[itemtype='http://schema.org/Product'] p#trip-highlights")
+      if nodes.length > 0
+        trip_description = nodes[0].content
+      else
+        raise Exceptions::TripParseError.new("empty trip description nodeset for doc #{url}")
+      end
+    rescue => e
+      raise Exceptions::TripParseError.new("error parsing trip description for doc #{url}", e)
+    end
+
+    begin
+      nodes = doc.css("div[itemtype='http://schema.org/Product'] div#trip-itinerary h5~ul>li>a")
+      if nodes.length > 0
+        country_names = nodes.collect{|a| a.content}
+      else
+        raise Exceptions::TripParseError.new("empty country names nodeset for doc #{url}", e)
+      end
+    rescue => e
+      raise Exceptions::TripParseError.new("error parsing country names for doc #{url}", e)
+    end
+
+    begin
+      nodes = doc.css("div[itemtype='http://schema.org/Product'] div#trip-itinerary div#itinerary-brief>h5")
+      if nodes.length > 0
+        itinerary_place_names = nodes.collect{|h5| get_place_names_from_itinerary_line(h5.content)}
+      else
+        raise Exceptions::TripParseError.new("empty itinerary place names nodeset for doc #{url}", e)
+      end
+    rescue => e
+      raise Exceptions::TripParseError.new("error parsing itinerary place names for doc #{url}", e)
+    end
+
+    begin
+      nodes = doc.css("div[itemtype='http://schema.org/Product'] div#trip-itinerary div#itinerary-brief>p")
+      if nodes.length > 0
+        itinerary_item_descriptions = nodes.collect{|p| p.content}
+      else
+        raise Exceptions::TripParseError.new("empty itinerary descriptions nodeset for doc #{url}", e)
+      end
+    rescue => e
+      raise Exceptions::TripParseError.new("error parsing itinerary description for doc #{url}", e)
+    end
+
+    if itinerary_place_names.length != itinerary_item_descriptions.length
+      raise Exceptions::TripParseError.new("error parsing itinerary lines for doc #{url}")
     end
 
     itinerary = []
-    begin
-      nodes = doc.css("div#trip-itinerary>div#itinerary-brief>div.content").children
-      i = 0
-      while i < nodes.length()
-        if nodes[i].name.eql?('h5')
-          place_names = get_place_names_from_itinerary_line(nodes[i].content)
-        else
-        end
-        i += 1
-        if nodes[i].name.eql?('p')
-          itinerary_item_description = nodes[i].content
-        else
-        end
-        i += 1
+    itinerary_place_names.length.times do |i|
+      place_names = itinerary_place_names[i]
+      itinerary_item_description = itinerary_item_descriptions[i]
 
-        place_names.each do |place_name|
-          itinerary << {'description' => itinerary_item_description, 'place' => {'name' => place_name}}
-        end
+      place_names.each do |place_name|
+        itinerary << {'description' => itinerary_item_description, 'place' => {'name' => place_name}}
       end
-    rescue => e
-      raise Exceptions::TripParseError.new("error parsing doc for itinerary lines", e)
     end
 
     TripBuilder.perform_async({'url' => uri.to_s, 'name' => trip_name, 'description' => trip_description, 'regions' => country_names, 'itinerary' => itinerary})
