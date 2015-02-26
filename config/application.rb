@@ -28,12 +28,10 @@ module Tripgraph
 
     config.google_geocoder = {
       :throttle => (24 * 60 * 60) / 2500,
-      :cc_tlds => {
+      :country_map => {
         "England" => "United Kingdom",
-        "Inca Trail" => "Peru",
-        "Kilimanjaro" => "Tanzania",
-        "Machu Picchu" => "Peru",
         "Scotland" => "United Kingdom",
+        "Tibet" => "China",
       }
     }
 
@@ -63,8 +61,8 @@ module Tripgraph
 
       # substitute GoogleGeocoder cc_tld lookup
       Aspect.new :around, :calls_to => [:get_cc_tld], :on_types => [GoogleGeocoder::GoogleGeocoder] do |join_point, object, country|
-        if config.google_geocoder[:cc_tlds].key?(country)
-          result = join_point.proceed(config.google_geocoder[:cc_tlds][country])
+        if config.google_geocoder[:country_map].key?(country)
+          result = join_point.proceed(config.google_geocoder[:country_map][country])
         else
           result = join_point.proceed
         end
