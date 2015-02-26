@@ -20,7 +20,7 @@ module Tripgraph
     # config.i18n.load_path += Dir[Rails.root.join('my', 'locales', '*.{rb,yml}').to_s]
     # config.i18n.default_locale = :de
 
-    config.cache_store = :redis_store, { :url => ENV['REDISCLOUD_URL'] || "redis://localhost", :namespace => "cache", :expires_in => 1.month }
+    config.cache_store = :redis_store, { :url => ENV['REDISCLOUD_URL'] || "redis://localhost", :namespace => "cache" }
     config.redis = { :url => ENV['REDISCLOUD_URL'] || "redis://localhost" }
     config.redis_semaphore = { :url => ENV['REDISCLOUD_URL'] || "redis://localhost" }
 
