@@ -36,11 +36,19 @@ module Tripgraph
     }
 
     config.after_initialize do
+      require 'trip_writer'
+      require 'google_geocoder'
       require 'aquarium'
       require 'open-uri'
-      require 'google_geocoder'
+      require 'json'
 
       include Aquarium::Aspects
+      logger = ActiveSupport::TaggedLogging.new(Rails.logger)
+
+      # log TripWriter job executions
+      Aspect.new :before, :calls_to => [:perform_async], :method_options => [:class], :on_types => [TripWriter] do |join_point, object, trip|
+        logger.tagged(TripWriter.name) { logger.debug trip.to_json }
+      end
 
       # throttle GoogleGeocoder geocoding requests
       Aspect.new :around, :calls_to => [:open_uri], :method_options => [:class], :on_types => [OpenURI] do |join_point, object, name|
